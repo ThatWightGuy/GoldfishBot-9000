@@ -5,12 +5,12 @@ from secrets import *
 # tweepy documentation (for later)
 # http://tweepy.readthedocs.io/en/v3.5.0/index.html
 
-auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
-
-api = tweepy.API(auth)
+#api = tweepy.API(auth)
 
 class Glubs:
+    def __init__(self, api):
+        self.api = api
+
     def punctuation(self):
         return random.choice(['. ', '? ', '! '])
 
@@ -48,10 +48,24 @@ class Glubs:
 
         return glubString
 
-def main():
-    glubs = Glubs()
+    def tweetGlub(self):
+        self.api.update_status(self.generateGlubs())
 
-    # api.update_status(glubs.generateGlubs())
+class Tweet_Listener(tweepy.StreamListener):
+    def on_data(self, data):
+        print("Data found. The goldfish will now speak...", data)
+        api = tweepy.API(stream.auth)
+        glub = Glubs(api)
+        glub.tweetGlub()
+        return True
+
+    def on_error(self, status_code):
+        print(status_code)
 
 if __name__ == '__main__':
-    main()
+    listener = Tweet_Listener()
+    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+    auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
+    api = tweepy.API(auth)
+    stream = tweepy.Stream(auth, listener)
+    stream.filter(follow=['3051167834'])
